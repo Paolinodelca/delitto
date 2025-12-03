@@ -49,114 +49,62 @@
 <div id="response"></div>
 
 <script>
-let API_KEY = "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";
+//let API_KEY = "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";
 
-   let suspect = "";
 
-  function selectSuspect(name) {
-    suspect = name;
-    document.getElementById("suspectName").innerText = name;
-    document.getElementById("response").innerText = "";
-  }
+const form = document.getElementById("chatForm");
+const output = document.getElementById("response");
+const suspectInput = document.getElementById("suspect");
 
-  async function ask() {
-    if (!suspect) {
-      alert("Seleziona prima un sospettato.");
-      return;
-    }
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
     const question = document.getElementById("question").value.trim();
     if (!question) return;
 
-    // Mostra che stiamo inviando
-    document.getElementById("response").innerText = "Invio domanda...";
-
-    const prompt = `
-Tu sei ${suspect}, uno dei tre sospettati in un caso di omicidio avvenuto nella Villa dei Cipressi.
-
-Il tuo obiettivo: rispondere alle domande dell'investigatore in modo credibile, mantenendo il tuo ruolo e
-cercando di nascondere il tuo eventuale coinvolgimento.
-
-Se sei colpevole, devi mentire in modo realistico.
-Se sei innocente, devi spiegarti, ma con emozioni e dettagli verosimili.
-
-Domanda dell’investigatore: "${question}"
-Rispondi come ${suspect}:`;
+    output.textContent = "Sto pensando...";
 
     try {
-      const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + API_KEY
-        },
-        body: JSON.stringify({
-          model: "gpt-oss-20b",
-          messages: [
-            { role: "system", content: "Sei un personaggio sospettato in un giallo. Rispondi in stile narrativo breve, con emozione e coerenza." },
-            { role: "user", content: prompt }
-          ],
-          temperature: 0.8,
-          max_tokens: 300
-        })
-      });
+        const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${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}`,   // <<<<< sostituisci
+            },
+            body: JSON.stringify({
+                model: "gpt-oss-7b-q8_0",  // modello garantito compatibile
+                messages: [
+                    { role: "system", content: "Sei uno dei sospettati del delitto in villa. Rispondi sempre in modo immersivo, realistico, coerente." },
+                    { role: "user", content: question }
+                ],
+            }),
+        });
 
-      // Logghiamo tutto per vedere cosa arriva (apri console del browser)
-      const data = await resp.json();
-      console.log("Raw response from Groq:", data);
+        const data = await resp.json();
 
-      // Se l'API ha restituito un errore esplicito, mostralo
-      if (data.error || data.errors) {
-        const msg = data.error?.message || JSON.stringify(data.errors) || "Errore sconosciuto dall'API";
-        document.getElementById("response").innerText = "API error: " + msg;
-        return;
-      }
+        // 🔍 Debug utile
+        console.log("Risposta API:", data);
 
-      // Proviamo più possibili percorsi nel JSON di risposta
-      let text = null;
+        // 🔐 FIX: protezione contro array vuoti
+        const reply =
+            data?.choices?.[0]?.message?.content ??
+            "Non ho ricevuto una risposta valida dal modello.";
 
-      // 1) struttura OpenAI-like (scelta iniziale)
-      if (data.choices && data.choices[0]) {
-        // chat completion compatibile
-        text = data.choices[0].message?.content || data.choices[0].text || null;
-      }
-
-      // 2) fallback: Groq a volte usa data.output
-      if (!text && data.output && Array.isArray(data.output) && data.output.length > 0) {
-        // output può contenere array di content con text
-        const out = data.output[0];
-        if (typeof out === "string") text = out;
-        else if (out.content && Array.isArray(out.content) && out.content[0]) {
-          text = out.content[0].text || out.content[0].message || out.content[0].payload || null;
-        } else if (out.text) {
-          text = out.text;
-        }
-      }
-
-      // 3) altri fallback generici (cerca la prima stringa evidente)
-      if (!text) {
-        // prova a cercare in qualsiasi campo noto
-        if (data.result && typeof data.result === "string") text = data.result;
-        if (!text) {
-          // ultima spiaggia: serializziamo l'oggetto per debug
-          text = "Risposta non riconosciuta dall'API. Controlla console per il JSON completo.";
-        }
-      }
-
-      document.getElementById("response").innerText = text;
+        output.textContent = reply;
 
     } catch (err) {
-      console.error("Fetch error:", err);
-      // Mostriamo info utili all'utente
-      document.getElementById("response").innerText =
-        "Errore di rete o CORS. Apri la console per dettagli (F12). Messaggio: " + (err.message || err);
+        console.error(err);
+        output.textContent = "Errore: " + err.message;
     }
-  }
+});
+
+
 </script>
 
 
 </body>
 </html>
+
 
 
 
