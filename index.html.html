@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delitto in Villa – Interrogatori</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 15px;
+      text-align: center;
+      background: #2e2e2e;
+      color: white;
+    }
+    #buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+      background: #ddd;
+    }
+    #buttons button {
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      background: #444;
+      color: white;
+      font-weight: bold;
+    }
+    #chat {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #fafafa;
+    }
+    .msg {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      max-width: 70%;
+    }
+    .player {
+      background: #d1e7ff;
+      margin-left: auto;
+    }
+    .bot {
+      background: #fff;
+      border: 1px solid #ccc;
+    }
+    footer {
+      padding: 10px;
+      background: #eee;
+      display: flex;
+      gap: 10px;
+    }
+    #inputBox {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+    }
+    #sendBtn {
+      padding: 10px 20px;
+      border: none;
+      background: #222;
+      color: white;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Delitto in Villa – Interrogatori</h2>
+    <p id="currentTarget">Nessun sospettato selezionato</p>
+  </header>
+
+  <div id="buttons">
+    <button onclick="selectTarget('clara')">Clara</button>
+    <button onclick="selectTarget('ernesto')">Ernesto</button>
+    <button onclick="selectTarget('luca')">Luca</button>
+  </div>
+
+  <div id="chat"></div>
+
+  <footer>
+    <input id="inputBox" placeholder="Scrivi una domanda…" />
+    <button id="sendBtn" onclick="sendMessage()">Invia</button>
+  </footer>
+
+  <script>
+    let target = null;
+
+    const prompts = {
+      clara: "Sei Clara Alvarès, la nipote. Rispondi con emozione, evita alcuni dettagli sugli orari…",
+      ernesto: "Sei Ernesto, il maggiordomo. Rispondi in modo impeccabile ma evita le domande dirette…",
+      luca: "Sei Luca Ferri, socio d'affari. Rispondi in modo teatrale e logorroico…"
+    };
+
+    function selectTarget(t) {
+      target = t;
+      document.getElementById('currentTarget').innerText = "Interroghi: " + t.toUpperCase();
+    }
+
+    function chatAdd(text, who) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + who;
+      div.innerText = text;
+      document.getElementById('chat').appendChild(div);
+      document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+    }
+
+    async function sendMessage() {
+      const box = document.getElementById('inputBox');
+      const text = box.value.trim();
+      if(!text || !target) return;
+
+      chatAdd(text, 'player');
+      box.value = '';
+
+      // Placeholder AI response
+      const fake = await fakeAIResponse(text);
+      chatAdd(fake, 'bot');
+    }
+
+    // Placeholder: simulazione risposta AI (poi sostituibile con API reali)
+    async function fakeAIResponse(q) {
+      return "[" + target.toUpperCase() + "] risposta simulata a: " + q;
+    }
+  </script>
+</body>
+</html>
