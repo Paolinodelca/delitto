@@ -1,141 +1,131 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Delitto in Villa – Interrogatori</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    header {
-      padding: 15px;
-      text-align: center;
-      background: #2e2e2e;
-      color: white;
-    }
-    #buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 10px;
-      background: #ddd;
-    }
-    #buttons button {
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
-      background: #444;
-      color: white;
-      font-weight: bold;
-    }
-    #chat {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      background: #fafafa;
-    }
-    .msg {
-      margin-bottom: 12px;
-      padding: 10px 14px;
-      border-radius: 6px;
-      max-width: 70%;
-    }
-    .player {
-      background: #d1e7ff;
-      margin-left: auto;
-    }
-    .bot {
-      background: #fff;
-      border: 1px solid #ccc;
-    }
-    footer {
-      padding: 10px;
-      background: #eee;
-      display: flex;
-      gap: 10px;
-    }
-    #inputBox {
-      flex: 1;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #bbb;
-    }
-    #sendBtn {
-      padding: 10px 20px;
-      border: none;
-      background: #222;
-      color: white;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Delitto in Villa – Interrogatorio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        #suspects {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .suspect-btn {
+            padding: 12px 20px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        #chat {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 300px;
+        }
+        #inputBox {
+            display: flex;
+            margin-top: 10px;
+        }
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        #sendBtn {
+            padding: 10px 15px;
+            margin-left: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
 </head>
+
 <body>
-  <header>
-    <h2>Delitto in Villa – Interrogatori</h2>
-    <p id="currentTarget">Nessun sospettato selezionato</p>
-  </header>
+<h1>Delitto in Villa – Interrogatorio</h1>
 
-  <div id="buttons">
-    <button onclick="selectTarget('clara')">Clara</button>
-    <button onclick="selectTarget('ernesto')">Ernesto</button>
-    <button onclick="selectTarget('luca')">Luca</button>
-  </div>
+<div id="suspects">
+    <button class="suspect-btn" onclick="selectSuspect('contessa')">Contessa Bianca</button>
+    <button class="suspect-btn" onclick="selectSuspect('maggiordomo')">Maggiordomo Alfredo</button>
+    <button class="suspect-btn" onclick="selectSuspect('cugina')">Cugina Viola</button>
+</div>
 
-  <div id="chat"></div>
+<div id="chat">
+    <p><i>Scegli un sospettato e inizia l'interrogatorio...</i></p>
+</div>
 
-  <footer>
-    <input id="inputBox" placeholder="Scrivi una domanda…" />
+<div id="inputBox">
+    <input id="userInput" type="text" placeholder="Scrivi una domanda...">
     <button id="sendBtn" onclick="sendMessage()">Invia</button>
-  </footer>
+</div>
 
-  <script>
-    let target = null;
+<script>
+let API_KEY = "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";
+let currentSuspect = null;
 
-    const prompts = {
-      clara: "Sei Clara Alvarès, la nipote. Rispondi con emozione, evita alcuni dettagli sugli orari…",
-      ernesto: "Sei Ernesto, il maggiordomo. Rispondi in modo impeccabile ma evita le domande dirette…",
-      luca: "Sei Luca Ferri, socio d'affari. Rispondi in modo teatrale e logorroico…"
-    };
+const profiles = {
+    "contessa": "Tu sei la Contessa Bianca, elegante, aristocratica, molto attenta a non farti accusare. Devi sempre apparire calma e superiore, e mentire con grazia quando serve.",
+    "maggiordomo": "Tu sei Alfredo, il maggiordomo. Sei nervoso e ansioso, temi di essere sospettato e ogni tanto ti contraddici. Cerchi di sembrare innocente.",
+    "cugina": "Tu sei Viola, la cugina ribelle. Sei impulsiva, emotiva, e nascondi molte cose. Rispondi in modo teatrale e drammatico."
+};
 
-    function selectTarget(t) {
-      target = t;
-      document.getElementById('currentTarget').innerText = "Interroghi: " + t.toUpperCase();
+function selectSuspect(suspect) {
+    currentSuspect = suspect;
+    document.getElementById("chat").innerHTML = `<b>Stai interrogando: ${suspect.toUpperCase()}</b><br><br>`;
+}
+
+async function sendMessage() {
+    if (!currentSuspect) {
+        alert("Prima scegli un sospettato!");
+        return;
     }
 
-    function chatAdd(text, who) {
-      const div = document.createElement('div');
-      div.className = 'msg ' + who;
-      div.innerText = text;
-      document.getElementById('chat').appendChild(div);
-      document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-    }
+    const question = document.getElementById("userInput").value;
+    if (!question.trim()) return;
 
-    async function sendMessage() {
-      const box = document.getElementById('inputBox');
-      const text = box.value.trim();
-      if(!text || !target) return;
+    const chatBox = document.getElementById("chat");
+    chatBox.innerHTML += `<p><b>Tu:</b> ${question}</p>`;
 
-      chatAdd(text, 'player');
-      box.value = '';
+    document.getElementById("userInput").value = "";
 
-      // Placeholder AI response
-      const fake = await fakeAIResponse(text);
-      chatAdd(fake, 'bot');
-    }
+    // Chiamata API a Groq
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+            model: "llama-3.1-8b-instant",
+            messages: [
+                { role: "system", content: profiles[currentSuspect] },
+                { role: "user", content: question }
+            ]
+        })
+    });
 
-    // Placeholder: simulazione risposta AI (poi sostituibile con API reali)
-    async function fakeAIResponse(q) {
-      return "[" + target.toUpperCase() + "] risposta simulata a: " + q;
-    }
-  </script>
+    const data = await response.json();
+    const answer = data.choices[0].message.content;
+
+    chatBox.innerHTML += `<p><b>${currentSuspect}:</b> ${answer}</p>`;
+}
+</script>
+
 </body>
 </html>
