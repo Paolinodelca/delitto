@@ -52,9 +52,9 @@
 //let API_KEY = "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";
 
 
+
 const form = document.getElementById("chatForm");
 const output = document.getElementById("response");
-const suspectInput = document.getElementById("suspect");
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -69,34 +69,43 @@ form.addEventListener("submit", async (e) => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${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}`,   // <<<<< sostituisci
+                "Authorization": "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",  // <<<<< cambia questo
             },
             body: JSON.stringify({
-                model: "gpt-oss-7b-q8_0",  // modello garantito compatibile
+                model: "gpt-oss-7b-q8_0",
                 messages: [
-                    { role: "system", content: "Sei uno dei sospettati del delitto in villa. Rispondi sempre in modo immersivo, realistico, coerente." },
-                    { role: "user", content: question }
-                ],
-            }),
+                    { role:"system", content:"Rispondi da sospettato di un giallo." },
+                    { role:"user", content: question }
+                ]
+            })
         });
 
-        const data = await resp.json();
+        const text = await resp.text();
 
-        // 🔍 Debug utile
-        console.log("Risposta API:", data);
+        console.log("RAW RESPONSE:", text);
 
-        // 🔐 FIX: protezione contro array vuoti
-        const reply =
-            data?.choices?.[0]?.message?.content ??
-            "Non ho ricevuto una risposta valida dal modello.";
+        let data;
+        try { data = JSON.parse(text); }
+        catch(e) {
+            output.textContent = "Risposta non in formato JSON:\n" + text;
+            return;
+        }
 
-        output.textContent = reply;
+        console.log("JSON:", data);
+
+        if (!data.choices || !data.choices[0]) {
+            output.textContent = "Errore API:\n" + JSON.stringify(data, null, 2);
+            return;
+        }
+
+        output.textContent = data.choices[0].message.content;
 
     } catch (err) {
-        console.error(err);
-        output.textContent = "Errore: " + err.message;
+        output.textContent = "Errore JS: " + err.message;
     }
 });
+
+
 
 
 </script>
@@ -104,6 +113,7 @@ form.addEventListener("submit", async (e) => {
 
 </body>
 </html>
+
 
 
 
