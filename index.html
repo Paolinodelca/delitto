@@ -1,67 +1,49 @@
+//let API_KEY = "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";
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Delitto in Villa – Interrogatorio</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f2e8;
-      padding: 20px;
-      max-width: 650px;
-      margin: auto;
-    }
-    h1 {
-      text-align: center;
-    }
-    #response {
-      white-space: pre-wrap;
-      background: #fff;
-      padding: 10px;
-      border-radius: 6px;
-      margin-top: 15px;
-      border: 1px solid #ccc;
-    }
-    button {
-      margin: 10px 3px;
-      padding: 10px 15px;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Delitto in Villa – Interrogatorio</title>
+<style>
+    body { font-family: Arial; padding: 20px; background:#f5f5f5; }
+    .suspect-btn { padding:10px; margin:5px; font-size:16px; cursor:pointer; }
+    #response { white-space: pre-wrap; background:white; padding:10px; margin-top:15px; }
+</style>
 </head>
 <body>
 
 <h1>Delitto in Villa</h1>
 <p>Scegli un sospettato da interrogare:</p>
 
-<button onclick="selectSuspect('Contessa Bianca')">Contessa Bianca</button>
-<button onclick="selectSuspect('Maggiordomo Arturo')">Maggiordomo Arturo</button>
-<button onclick="selectSuspect('Giardiniere Enzo')">Giardiniere Enzo</button>
+<button class="suspect-btn" onclick="selectSuspect('maggiordomo')">Maggiordomo</button>
+<button class="suspect-btn" onclick="selectSuspect('madre')">Madre della vittima</button>
+<button class="suspect-btn" onclick="selectSuspect('giardiniere')">Giardiniere</button>
 
-<p><strong>Sospettato selezionato:</strong> <span id="suspectName">Nessuno</span></p>
+<hr>
 
-<textarea id="question" rows="4" style="width:100%;" placeholder="Digita la tua domanda al sospettato..."></textarea>
+<h2>Interroga il sospettato</h2>
 
-  
-  <button onclick="ask()">Interroga</button>
+<input id="question" type="text" placeholder="Scrivi la tua domanda..." style="width:80%;padding:8px;">
+<button onclick="ask()" style="padding:8px;">Invia</button>
 
 <div id="response"></div>
 
 <script>
-//let API_KEY = "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";
+let currentSuspect = "maggiordomo";
 
+function selectSuspect(name) {
+    currentSuspect = name;
+    document.getElementById("response").textContent =
+        "Hai selezionato " + name + ". Fai una domanda.";
+}
 
-
-const form = document.getElementById("chatForm");
-const output = document.getElementById("response");
-
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const question = document.getElementById("question").value.trim();
+// FUNZIONE PRINCIPALE
+async function ask() {
+    const question = document.getElementById("question").value;
     if (!question) return;
 
+    const output = document.getElementById("response");
     output.textContent = "Sto pensando...";
 
     try {
@@ -69,27 +51,27 @@ form.addEventListener("submit", async (e) => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "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",  // <<<<< cambia questo
+                "Authorization": "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"
             },
             body: JSON.stringify({
                 model: "gpt-oss-7b-q8_0",
                 messages: [
-                    { role:"system", content:"Rispondi da sospettato di un giallo." },
-                    { role:"user", content: question }
+                    {
+                        role: "system",
+                        content:
+                            "Interpretazione: sei " + currentSuspect +
+                            ". Parli come lui. Hai un segreto da nascondere e rispondi in modo ambiguo ma realistico."
+                    },
+                    { role: "user", content: question }
                 ]
             })
         });
 
         const text = await resp.text();
-
-        console.log("RAW RESPONSE:", text);
-
         let data;
+
         try { data = JSON.parse(text); }
-        catch(e) {
-            output.textContent = "Risposta non in formato JSON:\n" + text;
-            return;
-        }
+        catch { output.textContent = "Risposta non JSON:\n" + text; return; }
 
         console.log("JSON:", data);
 
@@ -103,16 +85,13 @@ form.addEventListener("submit", async (e) => {
     } catch (err) {
         output.textContent = "Errore JS: " + err.message;
     }
-});
-
-
-
-
+}
 </script>
-
 
 </body>
 </html>
+
+
 
 
 
