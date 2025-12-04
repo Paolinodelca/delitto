@@ -98,44 +98,8 @@
   </footer>
 
   <script>
-    let target = null;
-
-    const prompts = {
-      clara: "Sei Clara Alvarès, la nipote. Rispondi con emozione, evita alcuni dettagli sugli orari…",
-      ernesto: "Sei Ernesto, il maggiordomo. Rispondi in modo impeccabile ma evita le domande dirette…",
-      luca: "Sei Luca Ferri, socio d'affari. Rispondi in modo teatrale e logorroico…"
-    };
-
-    function selectTarget(t) {
-      target = t;
-      document.getElementById('currentTarget').innerText = "Interroghi: " + t.toUpperCase();
-    }
-
-    function chatAdd(text, who) {
-      const div = document.createElement('div');
-      div.className = 'msg ' + who;
-      div.innerText = text;
-      document.getElementById('chat').appendChild(div);
-      document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-    }
-
-    async function sendMessage() {
-      const box = document.getElementById('inputBox');
-      const text = box.value.trim();
-      if(!text || !target) return;
-
-      chatAdd(text, 'player');
-      box.value = '';
-
-      // Placeholder AI response
-      const fake = await fakeAIResponse(text);
-      chatAdd(fake, 'bot');
-    }
-
-    // Placeholder: simulazione risposta AI (poi sostituibile con API reali)
-    async function fakeAIResponse(q) {
-      return "[" + target.toUpperCase() + "] risposta simulata a: " + q;
-    }
+   
   </script>
 </body>
 </html>
+
